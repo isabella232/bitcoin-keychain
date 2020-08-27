@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package pb.v1;
+option go_package = ".;pb";
+option java_package = "co.ledger.protobuf";
+
+import "google/protobuf/empty.proto";
+
+service KeychainService {
+  // Create a new keychain by descriptor.
+  rpc CreateKeychain(CreateKeychainRequest) returns (GetKeychainInfoResponse) {}
+
+  // Delete a keychain by descriptor.
+  rpc DeleteKeychain(DeleteKeychainRequest) returns (google.protobuf.Empty) {}
+
+  // Get keychain metadata.
+  rpc GetKeychainInfo(GetKeychainInfoRequest) returns (GetKeychainInfoResponse) {}
+}
+
+message CreateKeychainRequest {
+  string account_descriptor = 1;
+  uint32 lookahead_size = 2;
+}
+
+message DeleteKeychainRequest {
+  string account_descriptor = 1;
+}
+
+message GetKeychainInfoRequest {
+  string account_descriptor = 1;
+}
+
+message GetKeychainInfoResponse {
+  // Account descriptor of the keychain, at HD depth 3. MUST include the key
+  // origin information.
+  // Ref: https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md
+  string account_descriptor = 1;
+
+  // Extended public key serialized with standard HD version bytes.
+  string xpub = 2;
+
+  // Extended public key serialized with SLIP-0132 HD version bytes.
+  // Ref: https://github.com/satoshilabs/slips/blob/master/slip-0132.md
+  string slip32_extended_public_key = 3;
+
+  // External chain public key at HD tree depth 4.
+  string external_public_key = 4;
+
+  // External chain chain code at HD tree depth 4.
+  string external_chain_code = 5;
+
+  // Number of external chain addresses in keychain.
+  uint32 max_external_index = 6;
+
+  // Internal chain public key at HD tree depth 4.
+  string internal_public_key = 7;
+
+  // Internal chain chain code at HD tree depth 4.
+  string internal_chain_code = 8;
+
+  // Number of internal chain addresses in keychain.
+  uint32 max_internal_index = 9;
+
+  // Numerical size of the lookahead zone.
+  uint32 lookahead_size = 10;
+
+  // Scheme defines the scheme on which a keychain entry is based.
+  enum Scheme {
+    SCHEME_UNSPECIFIED = 0;  // fallback value if unrecognized / unspecified
+    SCHEME_BIP44       = 1;  // indicates that the keychain scheme is legacy.
+    SCHEME_BIP49       = 2; // indicates that the keychain scheme is segwit.
+    SCHEME_BIP84       = 3; // indicates that the keychain scheme is native segwit.
+  }
+  Scheme scheme = 11;
+}
