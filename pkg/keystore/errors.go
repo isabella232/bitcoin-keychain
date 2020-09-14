@@ -15,6 +15,10 @@ var (
 	// non-standard, and cannot be handled properly.
 	ErrUnrecognizedChange = errors.New("unrecognized change")
 
+	// ErrUnrecognizedNetwork indicates that the Network encountered was
+	// non-standard, and cannot be handled properly.
+	ErrUnrecognizedNetwork = errors.New("unrecognized network")
+
 	// ErrDescriptorNotFound indicates an attempt to get a descriptor from a
 	// keystore that has not been registered.
 	ErrDescriptorNotFound = errors.New("descriptor not found")

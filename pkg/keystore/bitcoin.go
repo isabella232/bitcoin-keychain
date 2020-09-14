@@ -10,24 +10,25 @@ import (
 	"github.com/ledgerhq/bitcoin-keychain-svc/bitcoin"
 )
 
-// encodingFromScheme is a helper to convert a Scheme from keystore package
-// to the corresponding type from bitcoin-svc.
-func encodingFromScheme(scheme Scheme) bitcoin.AddressEncoding {
+// protoEncodingFromScheme is a helper to convert a Scheme from keystore
+// package to the corresponding type from bitcoin-svc.
+func protoEncodingFromScheme(scheme Scheme) (bitcoin.AddressEncoding, error) {
 	switch scheme {
 	case BIP44:
-		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2PKH
+		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2PKH, nil
 	case BIP49:
-		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2SH_P2WPKH
+		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2SH_P2WPKH, nil
 	case BIP84:
-		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2WPKH
+		return bitcoin.AddressEncoding_ADDRESS_ENCODING_P2WPKH, nil
 	default:
-		return bitcoin.AddressEncoding_ADDRESS_ENCODING_UNSPECIFIED
+		return bitcoin.AddressEncoding_ADDRESS_ENCODING_UNSPECIFIED,
+			errors.Wrap(ErrUnrecognizedScheme, fmt.Sprint(scheme))
 	}
 }
 
-// schemeFromEncoding is a helper to convert an address encoding from
+// schemeFromProtoEncoding is a helper to convert an address encoding from
 // bitcoin-svc to the corresponding Scheme in the keystore package.
-func schemeFromEncoding(encoding bitcoin.AddressEncoding) (Scheme, error) {
+func schemeFromProtoEncoding(encoding bitcoin.AddressEncoding) (Scheme, error) {
 	switch encoding {
 	case bitcoin.AddressEncoding_ADDRESS_ENCODING_P2PKH:
 		return BIP44, nil
@@ -43,7 +44,7 @@ func schemeFromEncoding(encoding bitcoin.AddressEncoding) (Scheme, error) {
 
 // bitcoinChainParams is a helper to convert a Network in keystore package to
 // the corresponding *bitcoin.ChainParams value in bitcoin-svc.
-func bitcoinChainParams(net Network) *bitcoin.ChainParams {
+func bitcoinChainParams(net Network) (*bitcoin.ChainParams, error) {
 	var network bitcoin.BitcoinNetwork
 
 	switch net {
@@ -53,14 +54,13 @@ func bitcoinChainParams(net Network) *bitcoin.ChainParams {
 		network = bitcoin.BitcoinNetwork_BITCOIN_NETWORK_TESTNET3
 	case Regtest:
 		network = bitcoin.BitcoinNetwork_BITCOIN_NETWORK_REGTEST
-
 	default:
-		network = bitcoin.BitcoinNetwork_BITCOIN_NETWORK_UNSPECIFIED
+		return nil, errors.Wrap(ErrUnrecognizedNetwork, fmt.Sprint(net))
 	}
 
 	return &bitcoin.ChainParams{
 		Network: &bitcoin.ChainParams_BitcoinNetwork{BitcoinNetwork: network},
-	}
+	}, nil
 }
 
 // networkFromChainParams is a helper to convert chain params from bitcoin-svc
@@ -86,8 +86,15 @@ func encodeAddress(
 	scheme Scheme,
 	net Network,
 ) (string, error) {
-	encoding := encodingFromScheme(scheme)
-	network := bitcoinChainParams(net)
+	encoding, err := protoEncodingFromScheme(scheme)
+	if err != nil {
+		return "", err
+	}
+
+	network, err := bitcoinChainParams(net)
+	if err != nil {
+		return "", err
+	}
 
 	addr, err := client.EncodeAddress(
 		context.Background(), &bitcoin.EncodeAddressRequest{

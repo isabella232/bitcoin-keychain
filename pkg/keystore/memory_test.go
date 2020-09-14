@@ -59,7 +59,7 @@ func (c mockBitcoinClient) EncodeAddress(
 		panic(err)
 	}
 
-	scheme, err := schemeFromEncoding(in.Encoding)
+	scheme, err := schemeFromProtoEncoding(in.Encoding)
 	if err != nil {
 		panic(err)
 	}
