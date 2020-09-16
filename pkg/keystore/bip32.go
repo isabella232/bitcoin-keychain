@@ -11,10 +11,10 @@ import (
 //
 // Hardened indexes are NOT supported, which is enforced by the uint32 type.
 //
-// ┌──────────────┬───────────────┐
-// │ change index │ address index │
-// │ 4 bytes      │ 4 bytes       │
-// └──────────────┴───────────────┘
+//   ┌──────────────┬───────────────┐
+//   │ change index │ address index │
+//   │ 4 bytes      │ 4 bytes       │
+//   └──────────────┴───────────────┘
 //
 // For example, if the full derivation path is m/44'/0'/0'/1/2, the
 // representation in DerivationPath would be DerivationPath{1, 2}.
