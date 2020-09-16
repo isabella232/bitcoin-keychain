@@ -25,16 +25,26 @@ func KeychainInfo(value keystore.KeychainInfo) *pb.KeychainInfo {
 		scheme = pb.KeychainInfo_SCHEME_UNSPECIFIED
 	}
 
+	var network pb.BitcoinNetwork
+
+	switch value.Network {
+	case keystore.Mainnet:
+		network = pb.BitcoinNetwork_BITCOIN_NETWORK_MAINNET
+	case keystore.Testnet3:
+		network = pb.BitcoinNetwork_BITCOIN_NETWORK_TESTNET3
+	case keystore.Regtest:
+		network = pb.BitcoinNetwork_BITCOIN_NETWORK_REGTEST
+	default:
+		network = pb.BitcoinNetwork_BITCOIN_NETWORK_UNSPECIFIED
+	}
+
 	return &pb.KeychainInfo{
-		AccountDescriptor:         value.Descriptor,
-		Xpub:                      value.XPub,
-		Slip32ExtendedPublicKey:   value.SLIP32ExtendedPublicKey,
-		ExternalXpub:              value.ExternalXPub,
-		ExternalFreshAddressIndex: value.MaxConsecutiveExternalIndex,
-		InternalXpub:              value.InternalXPub,
-		InternalFreshAddressIndex: value.MaxConsecutiveInternalIndex,
-		LookaheadSize:             value.LookaheadSize,
-		Scheme:                    scheme,
+		AccountDescriptor:       value.Descriptor,
+		Xpub:                    value.XPub,
+		Slip32ExtendedPublicKey: value.SLIP32ExtendedPublicKey,
+		LookaheadSize:           value.LookaheadSize,
+		Scheme:                  scheme,
+		Network:                 network,
 	}
 }
 
