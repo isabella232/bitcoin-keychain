@@ -1,7 +1,7 @@
 package keystore
 
 import (
-	"github.com/ledgerhq/bitcoin-keychain-svc/bitcoin"
+	"github.com/ledgerhq/bitcoin-keychain-svc/pb/bitcoin"
 	"github.com/pkg/errors"
 )
 

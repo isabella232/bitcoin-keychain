@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/pb/v1"
+	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
 	"github.com/ledgerhq/bitcoin-keychain-svc/pkg/keystore"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

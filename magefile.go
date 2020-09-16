@@ -16,7 +16,7 @@ const (
 		"-X $PACKAGE/version/version.buildDate=$BUILD_DATE"
 	protoPlugins = "plugins=grpc"
 	protoFile    = "service.proto"
-	protoDir     = "pb/v1"
+	protoDir     = "pb/keychain"
 )
 
 // Allow user to override executables on UNIX-like systems.
@@ -55,7 +55,7 @@ func Proto() error {
 		return err
 	}
 
-	return runner("service.proto", "bitcoin")
+	return runner("service.proto", "pb/bitcoin")
 }
 
 func Buf() error {

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package pb.v1;
-option go_package = ".;pb";
+package pb.keychain;
+option go_package = ".;keychain";
 option java_package = "co.ledger.protobuf";
 
 import "google/protobuf/empty.proto";
@@ -60,20 +60,6 @@ message KeychainInfo {
   // Extended public key serialized with SLIP-0132 HD version bytes.
   // Ref: https://github.com/satoshilabs/slips/blob/master/slip-0132.md
   string slip32_extended_public_key = 3;
-
-  // External chain extended public key at HD tree depth 4.
-  string external_xpub = 4;
-
-  // Address index on the external chain, at which a fresh receive address
-  // must be derived.
-  uint32 external_fresh_address_index = 6;
-
-  // Internal chain extended public key at HD tree depth 4.
-  string internal_xpub = 7;
-
-  // Address index on the internal chain, at which a fresh change address
-  // must be derived.
-  uint32 internal_fresh_address_index = 9;
 
   // Numerical size of the lookahead zone.
   uint32 lookahead_size = 10;

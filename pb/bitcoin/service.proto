@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package bitcoin;
+package pb.bitcoin;
 option go_package = ".;bitcoin";
 option java_package = "co.ledger.bitcoin.protobuf";
 
