@@ -38,6 +38,18 @@ func (s *InMemoryKeystore) Get(id uuid.UUID) (KeychainInfo, error) {
 	return document.Main, nil
 }
 
+// Delete removes a keychain corresponding to a UUID from the keystore.
+func (s *InMemoryKeystore) Delete(id uuid.UUID) error {
+	_, ok := s.db[id]
+	if !ok {
+		return ErrKeychainNotFound
+	}
+
+	delete(s.db, id)
+
+	return nil
+}
+
 // Create parses a populates the in-memory keystore with the corresponding
 // keychain information, based on the provided extended public key, Scheme,
 // and Network information.

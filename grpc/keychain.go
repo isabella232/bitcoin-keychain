@@ -38,7 +38,12 @@ func (c Controller) CreateKeychain(
 func (c Controller) DeleteKeychain(
 	ctx context.Context, request *pb.DeleteKeychainRequest,
 ) (*emptypb.Empty, error) {
-	panic("implement me")
+	id, err := KeychainID(request.KeychainId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, c.store.Delete(id)
 }
 
 func (c Controller) GetKeychainInfo(

@@ -13,6 +13,7 @@ import (
 //   RedisKeystore:    TBA
 type Keystore interface {
 	Get(id uuid.UUID) (KeychainInfo, error)
+	Delete(id uuid.UUID) error
 	Create(extendedPublicKey string, scheme Scheme, net Network) (KeychainInfo, error)
 	GetFreshAddress(id uuid.UUID, change Change) (string, error)
 	GetFreshAddresses(id uuid.UUID, change Change, size uint32) ([]string, error)
