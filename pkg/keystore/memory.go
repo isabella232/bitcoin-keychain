@@ -57,7 +57,7 @@ func (s *InMemoryKeystore) Delete(id uuid.UUID) error {
 // Only initial state is populated, so no addresses will be inserted into the
 // keystore by this method.
 func (s *InMemoryKeystore) Create(
-	extendedPublicKey string, scheme Scheme, net Network,
+	extendedPublicKey string, scheme Scheme, net Network, lookaheadSize uint32,
 ) (KeychainInfo, error) {
 	internalDescriptor, err := MakeDescriptor(extendedPublicKey, Internal, scheme)
 	if err != nil {

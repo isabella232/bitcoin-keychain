@@ -14,7 +14,8 @@ import (
 type Keystore interface {
 	Get(id uuid.UUID) (KeychainInfo, error)
 	Delete(id uuid.UUID) error
-	Create(extendedPublicKey string, scheme Scheme, net Network) (KeychainInfo, error)
+	Create(extendedPublicKey string, scheme Scheme, net Network,
+		lookaheadSize uint32) (KeychainInfo, error)
 	GetFreshAddress(id uuid.UUID, change Change) (string, error)
 	GetFreshAddresses(id uuid.UUID, change Change, size uint32) ([]string, error)
 	MarkPathAsUsed(id uuid.UUID, path DerivationPath) error
@@ -23,6 +24,10 @@ type Keystore interface {
 		fromIndex uint32, toIndex uint32) ([]AddressInfo, error)
 	GetDerivationPath(id uuid.UUID, address string) (DerivationPath, error)
 }
+
+// DefaultLookaheadSize defines the zone of addresses that the keychain must
+// observe.
+const DefaultLookaheadSize = 20
 
 // Scheme defines the scheme on which a keychain entry is based.
 type Scheme string
@@ -52,8 +57,6 @@ const (
 	// Regtest indicates the Bitcoin regression test network
 	Regtest Network = "regtest"
 )
-
-const lookaheadSize = 20
 
 // KeychainInfo models the global information related to an account registered
 // in the keystore.

@@ -114,7 +114,8 @@ func TestInMemoryKeystore_GetCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			keystore := NewMockInMemoryKeystore()
 
-			gotInfo, err := keystore.Create(tt.extendedKey, tt.scheme, tt.network)
+			gotInfo, err := keystore.Create(
+				tt.extendedKey, tt.scheme, tt.network, DefaultLookaheadSize)
 			if err != nil && tt.wantErr == nil {
 				t.Fatalf("Create() unexpected error: %v", err)
 			}
@@ -182,7 +183,8 @@ func TestInMemoryKeystore_GetFreshAddress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			keystore := NewMockInMemoryKeystore()
-			info, err := keystore.Create(tt.extendedKey, tt.scheme, tt.network)
+			info, err := keystore.Create(
+				tt.extendedKey, tt.scheme, tt.network, DefaultLookaheadSize)
 			if err != nil {
 				panic(err)
 			}
@@ -249,7 +251,8 @@ func TestInMemoryKeystore_GetFreshAddresses(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			keystore := NewMockInMemoryKeystore()
-			info, err := keystore.Create(tt.extendedKey, tt.scheme, tt.network)
+			info, err := keystore.Create(
+				tt.extendedKey, tt.scheme, tt.network, DefaultLookaheadSize)
 			if err != nil {
 				panic(err)
 			}
@@ -280,7 +283,8 @@ func TestInMemoryKeystore_GetFreshAddresses(t *testing.T) {
 func TestInMemoryKeystore_MarkPathAsUsed(t *testing.T) {
 	keystore := NewMockInMemoryKeystore()
 
-	info, err := keystore.Create("xpub1111", BIP84, Mainnet)
+	info, err := keystore.Create(
+		"xpub1111", BIP84, Mainnet, DefaultLookaheadSize)
 	if err != nil {
 		panic(err)
 	}

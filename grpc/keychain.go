@@ -27,7 +27,13 @@ func (c Controller) CreateKeychain(
 		return nil, err
 	}
 
-	r, err := c.store.Create(request.ExtendedPublicKey, scheme, net)
+	lookaheadSize := uint32(keystore.DefaultLookaheadSize) // default lookahead size
+	if s := request.GetLookaheadSize(); s != 0 {
+		lookaheadSize = s
+	}
+
+	r, err := c.store.Create(
+		request.ExtendedPublicKey, scheme, net, lookaheadSize)
 	if err != nil {
 		return nil, err
 	}
