@@ -3,6 +3,8 @@ package log
 import (
 	"os"
 
+	"github.com/ledgerhq/bitcoin-keychain-svc/config"
+
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	"github.com/spf13/viper"
@@ -39,40 +41,33 @@ type Logger interface {
 	Warnln(args ...interface{})
 }
 
-var defaultLogger *logrus.Logger
-
-// NewLogger returns a configured logrus instance
-func NewLogger(cfg viper.Viper) *logrus.Logger {
-	return newLogrusLogger(cfg)
-}
+var defaultLogger = newLogrusLogger(*config.LoadProvider("bitcoin_keychain"))
 
 func newLogrusLogger(cfg viper.Viper) *logrus.Logger {
-	l := logrus.New()
-	l.SetFormatter(&prefixed.TextFormatter{
-		TimestampFormat:  "2006/01/02 - 15:04:05",
-		FullTimestamp:    true,
-		QuoteEmptyFields: true,
-		SpacePadding:     45,
-	})
-
-	if cfg.GetBool("json_logs") {
-		l.Formatter = new(logrus.JSONFormatter)
-	}
-
-	l.Out = os.Stderr
-
+	var level logrus.Level
 	switch cfg.GetString("loglevel") {
 	case "debug":
-		l.Level = logrus.DebugLevel
+		level = logrus.DebugLevel
 	case "warning":
-		l.Level = logrus.WarnLevel
+		level = logrus.WarnLevel
 	case "info":
-		l.Level = logrus.InfoLevel
+		level = logrus.InfoLevel
 	default:
-		l.Level = logrus.DebugLevel
+		level = logrus.DebugLevel
 	}
 
-	return l
+	return &logrus.Logger{
+		Out:   os.Stderr,
+		Level: level,
+		Formatter: &prefixed.TextFormatter{
+			TimestampFormat:  "2006-01-02 15:04:05.100",
+			FullTimestamp:    true,
+			QuoteEmptyFields: true,
+			SpacePadding:     50,
+			ForceFormatting:  true,
+			ForceColors:      true,
+		},
+	}
 }
 
 // Fields is a map string interface to define fields in the structured log
