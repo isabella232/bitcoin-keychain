@@ -36,6 +36,9 @@ FROM alpine
 
 COPY --from=builder /app/server /app/server
 
+ENV GRPC_GO_LOG_SEVERITY_LEVEL info
+ENV GRPC_GO_LOG_VERBOSITY_LEVEL 1
+
 EXPOSE 50052
 
 CMD ["/app/server"]
