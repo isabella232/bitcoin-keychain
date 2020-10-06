@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 
+	"github.com/ledgerhq/bitcoin-keychain-svc/log"
+
 	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
 	"github.com/ledgerhq/bitcoin-keychain-svc/pkg/keystore"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -111,6 +113,11 @@ func (c Controller) GetAllObservableAddresses(
 ) (*pb.GetAllObservableAddressesResponse, error) {
 	id, err := KeychainID(request.KeychainId)
 	if err != nil {
+		log.WithFields(log.Fields{
+			"id":    request.KeychainId,
+			"error": err,
+		}).Error("[grpc] GetAllObservableAddresses: invalid KeychainID")
+
 		return nil, err
 	}
 
@@ -120,6 +127,12 @@ func (c Controller) GetAllObservableAddresses(
 	} else {
 		change, err := Change(request.Change)
 		if err != nil {
+			log.WithFields(log.Fields{
+				"id":     id.String(),
+				"change": request.Change.String(),
+				"error":  err,
+			}).Error("[grpc] GetAllObservableAddresses: invalid Change")
+
 			return nil, err
 		}
 
@@ -138,9 +151,21 @@ func (c Controller) GetAllObservableAddresses(
 	var addrs []keystore.AddressInfo
 
 	for _, change := range changeList {
+		log.WithFields(log.Fields{
+			"id":     id,
+			"change": change,
+			"range":  []uint32{request.FromIndex, to},
+		}).Info("[grpc] GetAllObservableAddresses: get from keystore")
+
 		changeAddrs, err := c.store.GetAllObservableAddresses(
 			id, change, request.FromIndex, to)
 		if err != nil {
+			log.WithFields(log.Fields{
+				"id":     id.String(),
+				"change": request.Change.String(),
+				"error":  err,
+			}).Error("[grpc] GetAllObservableAddresses: failed to fetch from keystore")
+
 			return nil, err
 		}
 
@@ -150,13 +175,25 @@ func (c Controller) GetAllObservableAddresses(
 	var addrInfoList []*pb.AddressInfo
 
 	for _, addrInfo := range addrs {
-		addrInfo, err := AddressInfoProto(addrInfo)
+		addrInfoProto, err := AddressInfoProto(addrInfo)
 		if err != nil {
+			log.WithFields(log.Fields{
+				"id":    id.String(),
+				"addr":  addrInfo.Address,
+				"error": err,
+			}).Error("[grpc] GetAllObservableAddresses: invalid AddressInfo")
+
 			return nil, err
 		}
 
-		addrInfoList = append(addrInfoList, addrInfo)
+		addrInfoList = append(addrInfoList, addrInfoProto)
 	}
+
+	log.WithFields(log.Fields{
+		"id":     id.String(),
+		"num":    len(addrInfoList),
+		"change": changeList,
+	}).Info("[grpc] GetAllObservableAddresses: successful")
 
 	return &pb.GetAllObservableAddressesResponse{Addresses: addrInfoList}, nil
 }
