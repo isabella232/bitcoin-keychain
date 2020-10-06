@@ -35,7 +35,9 @@ func startKeychainSvc() {
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			log.Fatalf("Server exited with error: %v", err)
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Fatal("failed to serve")
 		}
 	}()
 }
@@ -51,7 +53,9 @@ func keychainSvcClient(ctx context.Context) (pb.KeychainServiceClient, *grpc.Cli
 	conn, err := grpc.DialContext(
 		ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Failed to dial bufnet: %v", err)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("failed to dial bufnet")
 	}
 
 	client := pb.NewKeychainServiceClient(conn)

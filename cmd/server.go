@@ -5,18 +5,19 @@ import (
 	"net"
 
 	"github.com/ledgerhq/bitcoin-keychain-svc/config"
-	"google.golang.org/grpc/reflection"
-
 	controllers "github.com/ledgerhq/bitcoin-keychain-svc/grpc"
 	"github.com/ledgerhq/bitcoin-keychain-svc/log"
 	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func serve(addr string) {
 	conn, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("Cannot listen to address %s", addr)
+		log.WithFields(log.Fields{
+			"addr": addr,
+		}).Fatal("cannot listen to address")
 	}
 
 	s := grpc.NewServer()
@@ -26,7 +27,9 @@ func serve(addr string) {
 	reflection.Register(s)
 
 	if err := s.Serve(conn); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("failed to serve")
 	}
 }
 

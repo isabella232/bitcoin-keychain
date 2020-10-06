@@ -3,6 +3,8 @@ package log
 import (
 	"os"
 
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+
 	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"
@@ -46,6 +48,12 @@ func NewLogger(cfg viper.Viper) *logrus.Logger {
 
 func newLogrusLogger(cfg viper.Viper) *logrus.Logger {
 	l := logrus.New()
+	l.SetFormatter(&prefixed.TextFormatter{
+		TimestampFormat:  "2006/01/02 - 15:04:05",
+		FullTimestamp:    true,
+		QuoteEmptyFields: true,
+		SpacePadding:     45,
+	})
 
 	if cfg.GetBool("json_logs") {
 		l.Formatter = new(logrus.JSONFormatter)

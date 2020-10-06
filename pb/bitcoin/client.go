@@ -28,7 +28,10 @@ func NewBitcoinClient() CoinServiceClient {
 
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"error": err,
+			"addr":  addr,
+		}).Fatal("failed to dial CoinServiceClient")
 	}
 
 	return NewCoinServiceClient(conn)
