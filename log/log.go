@@ -45,6 +45,7 @@ var defaultLogger = newLogrusLogger(*config.LoadProvider("bitcoin_keychain"))
 
 func newLogrusLogger(cfg viper.Viper) *logrus.Logger {
 	var level logrus.Level
+
 	switch cfg.GetString("loglevel") {
 	case "debug":
 		level = logrus.DebugLevel
