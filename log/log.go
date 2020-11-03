@@ -3,7 +3,7 @@ package log
 import (
 	"os"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/config"
+	"github.com/ledgerhq/bitcoin-keychain/config"
 
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 

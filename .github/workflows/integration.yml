@@ -25,15 +25,15 @@ jobs:
         run: |
           go get github.com/golang/protobuf/protoc-gen-go
 
-      - name: Check out bitcoin-svc
+      - name: Check out bitcoin-lib-grpc
         uses: actions/checkout@master
         with:
-          repository: LedgerHQ/bitcoin-svc
-          path: 'bitcoin-svc'
+          repository: LedgerHQ/bitcoin-lib-grpc
+          path: 'bitcoin-lib-grpc'
 
-      - name: Run bitcoin-svc in the background
+      - name: Run bitcoin-lib-grpc in the background
         run: |
-          pushd bitcoin-svc
+          pushd bitcoin-lib-grpc
           mage -v build
           ./lbs &
           popd

@@ -15,7 +15,7 @@ jobs:
       - name: Prepare Docker tag
         id: prep
         run: |
-          DOCKER_IMAGE=ledgerhq/bitcoin-keychain-svc
+          DOCKER_IMAGE=ledgerhq/bitcoin-keychain
 
           VERSION=noop
           if [[ $GITHUB_REF == refs/tags/* ]]; then

@@ -12,7 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/pb/bitcoin"
+	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 	"google.golang.org/grpc"
 )
 

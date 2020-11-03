@@ -7,11 +7,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/pb/bitcoin"
+	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 )
 
 // protoEncodingFromScheme is a helper to convert a Scheme from keystore
-// package to the corresponding type from bitcoin-svc.
+// package to the corresponding type from bitcoin-lib-grpc.
 func protoEncodingFromScheme(scheme Scheme) (bitcoin.AddressEncoding, error) {
 	switch scheme {
 	case BIP44:
@@ -27,7 +27,7 @@ func protoEncodingFromScheme(scheme Scheme) (bitcoin.AddressEncoding, error) {
 }
 
 // schemeFromProtoEncoding is a helper to convert an address encoding from
-// bitcoin-svc to the corresponding Scheme in the keystore package.
+// bitcoin-lib-grpc to the corresponding Scheme in the keystore package.
 func schemeFromProtoEncoding(encoding bitcoin.AddressEncoding) (Scheme, error) {
 	switch encoding {
 	case bitcoin.AddressEncoding_ADDRESS_ENCODING_P2PKH:
@@ -43,7 +43,7 @@ func schemeFromProtoEncoding(encoding bitcoin.AddressEncoding) (Scheme, error) {
 }
 
 // bitcoinChainParams is a helper to convert a Network in keystore package to
-// the corresponding *bitcoin.ChainParams value in bitcoin-svc.
+// the corresponding *bitcoin.ChainParams value in bitcoin-lib-grpc.
 func bitcoinChainParams(net Network) (*bitcoin.ChainParams, error) {
 	var network bitcoin.BitcoinNetwork
 
@@ -63,7 +63,7 @@ func bitcoinChainParams(net Network) (*bitcoin.ChainParams, error) {
 	}, nil
 }
 
-// networkFromChainParams is a helper to convert chain params from bitcoin-svc
+// networkFromChainParams is a helper to convert chain params from bitcoin-lib-grpc
 // to the corresponding Network in keystore package.
 func networkFromChainParams(params *bitcoin.ChainParams) (Network, error) {
 	switch net := params.GetBitcoinNetwork(); net {

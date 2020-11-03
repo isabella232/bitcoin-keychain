@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/proto"
-	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
+	pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
 )
 
 func TestP2PKHKeychainTest(t *testing.T) {
 	ctx := context.Background()
-	client, conn := keychainSvcClient(ctx)
+	client, conn := keychainClient(ctx)
 	defer conn.Close()
 
 	info, err := client.CreateKeychain(ctx, &pb.CreateKeychainRequest{

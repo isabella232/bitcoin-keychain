@@ -1,6 +1,6 @@
 package integration
 
-import pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
+import pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
 
 type Fixture struct {
 	ExternalDescriptor string

@@ -4,10 +4,10 @@ import (
 	"context"
 	"net"
 
-	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
+	pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
 
-	controllers "github.com/ledgerhq/bitcoin-keychain-svc/grpc"
-	"github.com/ledgerhq/bitcoin-keychain-svc/log"
+	controllers "github.com/ledgerhq/bitcoin-keychain/grpc"
+	"github.com/ledgerhq/bitcoin-keychain/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/test/bufconn"
 )
@@ -18,15 +18,15 @@ var lis *bufconn.Listener
 
 // launch at package initialization
 func init() {
-	startKeychainSvc()
+	startKeychain()
 }
 
-// startKeychainSvc launches a keychain gRPC server over a buffered connection.
+// startKeychain launches a keychain gRPC server over a buffered connection.
 // This allows us to use a full-blown server for tests, without reserving a
 // TCP port for the same.
 //
 // gRPC client can use the same connection to dial to the server.
-func startKeychainSvc() {
+func startKeychain() {
 	lis = bufconn.Listen(bufSize)
 	s := grpc.NewServer()
 
@@ -47,9 +47,9 @@ func bufDialer(context.Context, string) (net.Conn, error) {
 	return lis.Dial()
 }
 
-// keychainSvcClient connects to the keychain gRPC service via a buffered
+// keychainClient connects to the keychain gRPC service via a buffered
 // connection.
-func keychainSvcClient(ctx context.Context) (pb.KeychainServiceClient, *grpc.ClientConn) {
+func keychainClient(ctx context.Context) (pb.KeychainServiceClient, *grpc.ClientConn) {
 	conn, err := grpc.DialContext(
 		ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {

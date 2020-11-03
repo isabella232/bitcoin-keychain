@@ -8,8 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	pb "github.com/ledgerhq/bitcoin-keychain-svc/pb/keychain"
-	"github.com/ledgerhq/bitcoin-keychain-svc/pkg/keystore"
+	pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
+	"github.com/ledgerhq/bitcoin-keychain/pkg/keystore"
 )
 
 // KeychainInfo is an adapter function to convert a keystore.KeychainInfo

@@ -1,11 +1,11 @@
-module github.com/ledgerhq/bitcoin-keychain-svc
+module github.com/ledgerhq/bitcoin-keychain
 
 go 1.15
 
 require (
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.2
-	github.com/ledgerhq/bitcoin-keychain-svc/pb v0.1.0
+	github.com/ledgerhq/bitcoin-keychain/pb v0.1.0
 	github.com/magefile/mage v1.10.0
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
@@ -21,4 +21,4 @@ require (
 	google.golang.org/protobuf v1.25.0
 )
 
-replace github.com/ledgerhq/bitcoin-keychain-svc/pb => ./pb
+replace github.com/ledgerhq/bitcoin-keychain/pb => ./pb

@@ -3,7 +3,7 @@ package keystore
 import (
 	"context"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/pb/bitcoin"
+	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 )
 
 // DerivationPath represents the BIP32 derivation path as an array, relative

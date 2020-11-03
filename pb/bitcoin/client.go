@@ -3,13 +3,13 @@ package bitcoin
 import (
 	"fmt"
 
-	"github.com/ledgerhq/bitcoin-keychain-svc/config"
-	"github.com/ledgerhq/bitcoin-keychain-svc/log"
+	"github.com/ledgerhq/bitcoin-keychain/config"
+	"github.com/ledgerhq/bitcoin-keychain/log"
 	"google.golang.org/grpc"
 )
 
-// NewBitcoinSvcClient creates a new CoinService client by dialing the
-// external bitcoin-svc gRPC service.
+// NewBitcoinClient creates a new CoinService client by dialing the
+// external bitcoin-lib-grpc gRPC service.
 func NewBitcoinClient() CoinServiceClient {
 	configProvider := config.LoadProvider("bitcoin")
 

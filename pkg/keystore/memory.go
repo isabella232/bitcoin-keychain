@@ -2,14 +2,14 @@ package keystore
 
 import (
 	"github.com/google/uuid"
-	"github.com/ledgerhq/bitcoin-keychain-svc/pb/bitcoin"
+	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 	"github.com/pkg/errors"
 )
 
 // InMemoryKeystore implements the Keystore interface where the storage
 // is an in-memory map. Useful for unit-tests.
 //
-// It also includes a client to communicate with a bitcoin-svc gRPC server
+// It also includes a client to communicate with a bitcoin-lib-grpc gRPC server
 // for protocol-level operations.
 type InMemoryKeystore struct {
 	db     Schema

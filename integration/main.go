@@ -6,5 +6,5 @@ package integration
 // Suppress unused/deadcode warnings when package side-effects are not invoked,
 // for example while running linters.
 var (
-	_ = keychainSvcClient
+	_ = keychainClient
 )
