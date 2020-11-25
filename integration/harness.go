@@ -11,6 +11,7 @@ import (
 	controllers "github.com/ledgerhq/bitcoin-keychain/grpc"
 	"github.com/ledgerhq/bitcoin-keychain/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -44,6 +45,10 @@ func startKeychain() {
 	}
 
 	pb.RegisterKeychainServiceServer(s, keychainController)
+
+	healthCheckerController := controllers.NewHealthChecker()
+
+	grpc_health_v1.RegisterHealthServer(s, healthCheckerController)
 
 	go func() {
 		if err := s.Serve(lis); err != nil {

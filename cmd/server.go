@@ -12,6 +12,7 @@ import (
 	"github.com/ledgerhq/bitcoin-keychain/log"
 	pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -33,6 +34,10 @@ func serve(grpcAddr string, redisOpts *redis.Options) {
 	}
 
 	pb.RegisterKeychainServiceServer(s, keychainController)
+
+	healthCheckerController := controllers.NewHealthChecker()
+
+	grpc_health_v1.RegisterHealthServer(s, healthCheckerController)
 
 	reflection.Register(s)
 
