@@ -336,3 +336,26 @@ func (s *InMemoryKeystore) MarkAddressAsUsed(id uuid.UUID, address string) error
 
 	return s.MarkPathAsUsed(id, path)
 }
+
+// GetAddressesPublicKeys reads the derivation-to-publicKey mapping in the keystore,
+// and returns extendend public keys corresponding to given derivations.
+func (s *InMemoryKeystore) GetAddressesPublicKeys(id uuid.UUID, derivations []DerivationPath) ([]string, error) {
+	k, ok := s.db[id]
+	if !ok {
+		return nil, ErrKeychainNotFound
+	}
+
+	publicKeys := make([]string, len(derivations))
+
+	for idx, derivation := range derivations {
+		publicKey, ok := k.Derivations[derivation]
+
+		if !ok {
+			return nil, ErrDerivationNotFound
+		}
+
+		publicKeys[idx] = publicKey
+	}
+
+	return publicKeys, nil
+}
