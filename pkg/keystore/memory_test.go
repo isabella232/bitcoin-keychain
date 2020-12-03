@@ -168,7 +168,7 @@ func TestInMemoryKeystore_GetFreshAddress(t *testing.T) {
 		scheme      Scheme
 		change      Change
 		network     Network
-		want        string
+		want        *AddressInfo
 		wantErr     error
 	}{
 		{
@@ -177,7 +177,7 @@ func TestInMemoryKeystore_GetFreshAddress(t *testing.T) {
 			scheme:      BIP84,
 			change:      External,
 			network:     Mainnet,
-			want:        "deadbeef00-BIP84-mainnet",
+			want:        &AddressInfo{Address: "deadbeef00-BIP84-mainnet", Derivation: DerivationPath{0, 0}, Change: External},
 		},
 	}
 	for _, tt := range tests {
@@ -220,7 +220,7 @@ func TestInMemoryKeystore_GetFreshAddresses(t *testing.T) {
 		scheme      Scheme
 		network     Network
 		size        uint32
-		want        []string
+		want        []AddressInfo
 		wantErr     error
 	}{
 		{
@@ -230,7 +230,7 @@ func TestInMemoryKeystore_GetFreshAddresses(t *testing.T) {
 			change:      External,
 			network:     Mainnet,
 			size:        0,
-			want:        []string{},
+			want:        []AddressInfo{},
 		},
 		{
 			name:        "p2pkh mainnet multi",
@@ -239,12 +239,12 @@ func TestInMemoryKeystore_GetFreshAddresses(t *testing.T) {
 			change:      External,
 			network:     Mainnet,
 			size:        5,
-			want: []string{
-				"deadbeef00-BIP84-mainnet",
-				"deadbeef01-BIP84-mainnet",
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef03-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
+			want: []AddressInfo{
+				{Address: "deadbeef00-BIP84-mainnet", Derivation: DerivationPath{0, 0}, Change: External},
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{0, 1}, Change: External},
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{0, 2}, Change: External},
+				{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{0, 3}, Change: External},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{0, 4}, Change: External},
 			},
 		},
 	}
@@ -294,8 +294,8 @@ func TestInMemoryKeystore_MarkPathAsUsed(t *testing.T) {
 		path               DerivationPath
 		change             Change
 		size               uint32
-		wantFreshAddresses []string
-		wantFreshAddress   string
+		wantFreshAddresses []AddressInfo
+		wantFreshAddress   *AddressInfo
 		wantErr            error
 	}{
 		{
@@ -303,42 +303,42 @@ func TestInMemoryKeystore_MarkPathAsUsed(t *testing.T) {
 			path:   DerivationPath{0, 0},
 			change: External,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef01-BIP84-mainnet", // should have no gaps
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef03-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{0, 1}, Change: External}, // should have no gaps
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{0, 2}, Change: External},
+				{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{0, 3}, Change: External},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{0, 4}, Change: External},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{0, 5}, Change: External},
 			},
-			wantFreshAddress: "deadbeef01-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{0, 1}, Change: External},
 		},
 		{
 			name:   "mark 0/2 as used",
 			path:   DerivationPath{0, 2}, // introduce a gap
 			change: External,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef01-BIP84-mainnet", // should detect the gap
-				"deadbeef03-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
-				"deadbeef06-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{0, 1}, Change: External}, // should detect the gap
+				{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{0, 3}, Change: External},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{0, 4}, Change: External},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{0, 5}, Change: External},
+				{Address: "deadbeef06-BIP84-mainnet", Derivation: DerivationPath{0, 6}, Change: External},
 			},
-			wantFreshAddress: "deadbeef01-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{0, 1}, Change: External},
 		},
 		{
 			name:   "mark 0/1 as used",
 			path:   DerivationPath{0, 1}, // fill the gap
 			change: External,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef03-BIP84-mainnet", // should have no gaps
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
-				"deadbeef06-BIP84-mainnet",
-				"deadbeef07-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{0, 3}, Change: External}, // should have no gaps
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{0, 4}, Change: External},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{0, 5}, Change: External},
+				{Address: "deadbeef06-BIP84-mainnet", Derivation: DerivationPath{0, 6}, Change: External},
+				{Address: "deadbeef07-BIP84-mainnet", Derivation: DerivationPath{0, 7}, Change: External},
 			},
-			wantFreshAddress: "deadbeef03-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{0, 3}, Change: External},
 		},
 		{
 			// internal chain should be unaffected by previous mutations
@@ -346,56 +346,56 @@ func TestInMemoryKeystore_MarkPathAsUsed(t *testing.T) {
 			path:   DerivationPath{1, 0},
 			change: Internal,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef01-BIP84-mainnet",
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef03-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{1, 2}, Change: Internal},
+				{Address: "deadbeef03-BIP84-mainnet", Derivation: DerivationPath{1, 3}, Change: Internal},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{1, 4}, Change: Internal},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{1, 5}, Change: Internal},
 			},
-			wantFreshAddress: "deadbeef01-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
 		},
 		{
 			name:   "mark 1/3 as used",
 			path:   DerivationPath{1, 3},
 			change: Internal,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef01-BIP84-mainnet",
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
-				"deadbeef06-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{1, 2}, Change: Internal},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{1, 4}, Change: Internal},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{1, 5}, Change: Internal},
+				{Address: "deadbeef06-BIP84-mainnet", Derivation: DerivationPath{1, 6}, Change: Internal},
 			},
-			wantFreshAddress: "deadbeef01-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
 		},
 		{
 			name:   "mark 1/6 as used",
 			path:   DerivationPath{1, 6},
 			change: Internal,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef01-BIP84-mainnet",
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
-				"deadbeef07-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{1, 2}, Change: Internal},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{1, 4}, Change: Internal},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{1, 5}, Change: Internal},
+				{Address: "deadbeef07-BIP84-mainnet", Derivation: DerivationPath{1, 7}, Change: Internal},
 			},
-			wantFreshAddress: "deadbeef01-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef01-BIP84-mainnet", Derivation: DerivationPath{1, 1}, Change: Internal},
 		},
 		{
 			name:   "mark 1/1 as used",
 			path:   DerivationPath{1, 1},
 			change: Internal,
 			size:   5,
-			wantFreshAddresses: []string{
-				"deadbeef02-BIP84-mainnet",
-				"deadbeef04-BIP84-mainnet",
-				"deadbeef05-BIP84-mainnet",
-				"deadbeef07-BIP84-mainnet",
-				"deadbeef08-BIP84-mainnet",
+			wantFreshAddresses: []AddressInfo{
+				{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{1, 2}, Change: Internal},
+				{Address: "deadbeef04-BIP84-mainnet", Derivation: DerivationPath{1, 4}, Change: Internal},
+				{Address: "deadbeef05-BIP84-mainnet", Derivation: DerivationPath{1, 5}, Change: Internal},
+				{Address: "deadbeef07-BIP84-mainnet", Derivation: DerivationPath{1, 7}, Change: Internal},
+				{Address: "deadbeef08-BIP84-mainnet", Derivation: DerivationPath{1, 8}, Change: Internal},
 			},
-			wantFreshAddress: "deadbeef02-BIP84-mainnet",
+			wantFreshAddress: &AddressInfo{Address: "deadbeef02-BIP84-mainnet", Derivation: DerivationPath{1, 2}, Change: Internal},
 		},
 	}
 
