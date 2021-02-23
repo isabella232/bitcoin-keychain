@@ -80,13 +80,27 @@ func TestKeychainRegistration(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:    "litecoin mainnet p2wpkh",
+			fixture: LitecoinMainnetP2WPKH,
+			externalAddress: &pb.GetFreshAddressesResponse{
+				Addresses: []*pb.AddressInfo{
+					{Address: "ltc1q7qnj9xm8wp8ucmg64lk0h03as8k6ql6rk4wvsd", Derivation: []uint32{0, 0}, Change: pb.Change_CHANGE_EXTERNAL},
+				},
+			},
+			internalAddress: &pb.GetFreshAddressesResponse{
+				Addresses: []*pb.AddressInfo{
+					{Address: "ltc1qx7mt6nztm8sm3dlj2lnw3vd4qg7jm2q6mvytsk", Derivation: []uint32{1, 0}, Change: pb.Change_CHANGE_INTERNAL},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			info, err := client.CreateKeychain(ctx, &pb.CreateKeychainRequest{
 				Account:       &pb.CreateKeychainRequest_ExtendedPublicKey{ExtendedPublicKey: tt.fixture.ExtendedPublicKey},
 				LookaheadSize: 20,
-				Network:       tt.fixture.Network,
+				ChainParams:   tt.fixture.ChainParams,
 				Scheme:        tt.fixture.Scheme,
 			})
 			if err != nil {
@@ -101,7 +115,7 @@ func TestKeychainRegistration(t *testing.T) {
 				Slip32ExtendedPublicKey: tt.fixture.ExtendedPublicKey,
 				LookaheadSize:           20,
 				Scheme:                  tt.fixture.Scheme,
-				Network:                 tt.fixture.Network,
+				ChainParams:             tt.fixture.ChainParams,
 			}
 
 			if !proto.Equal(info, wantKeychainInfo) {

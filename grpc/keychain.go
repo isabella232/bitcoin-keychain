@@ -5,9 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
-
 	"github.com/ledgerhq/bitcoin-keychain/log"
-
 	pb "github.com/ledgerhq/bitcoin-keychain/pb/keychain"
 	"github.com/ledgerhq/bitcoin-keychain/pkg/keystore"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -22,7 +20,7 @@ var store *keystore.RedisKeystore
 func (c Controller) CreateKeychain(
 	ctx context.Context, request *pb.CreateKeychainRequest,
 ) (*pb.KeychainInfo, error) {
-	net, err := Network(request.Network)
+	net, err := Network(request.ChainParams)
 	if err != nil {
 		return nil, err
 	}
