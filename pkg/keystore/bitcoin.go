@@ -161,7 +161,7 @@ func deriveAddress(
 		"id":   keychain.Main.ID.String(),
 		"addr": addr,
 		"path": path,
-	}).Info("[keystore] derive address")
+	}).Debug("[keystore] derive address")
 
 	// Feed address -> derivation path mapping
 	keychain.Addresses[addr] = path
