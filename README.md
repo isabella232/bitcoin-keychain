@@ -9,8 +9,9 @@ xpub and maintains mapping between those.
 The responsibilities of keychain are:
  - derive address for a given derivation path
  - get fresh receive and change addresses
- - reverse lookup of address to derivation path
- - get the public key of an address
+ - reverse lookup of address to derivation path: for transaction creation, we need
+to check the address associated to the path belong to the account (not asked by protocol but by hardware wallet)
+ - get the public key of an address: needed for transaction creation by protocol
  - manage gaps
 
 The interface is defined as [protobuf](pb/keychain/service.proto)
