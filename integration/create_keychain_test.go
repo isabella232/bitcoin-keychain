@@ -127,13 +127,13 @@ func TestKeychainRegistration(t *testing.T) {
 				ctx, &pb.GetFreshAddressesRequest{
 					KeychainId: info.KeychainId,
 					Change:     pb.Change_CHANGE_EXTERNAL,
-					BatchSize:  1,
+					BatchSize:  10,
 				})
 			if err != nil {
 				t.Fatalf("failed to get fresh external addr - error = %v", err)
 			}
 
-			if !proto.Equal(gotExtAddr, tt.externalAddress) {
+			if !proto.Equal(gotExtAddr.Addresses[0], tt.externalAddress.Addresses[0]) {
 				t.Fatalf("GetFreshAddresses() info = '%v', want = '%v'",
 					gotExtAddr.Addresses, tt.externalAddress.Addresses)
 			}
@@ -181,6 +181,36 @@ func TestKeychainRegistration(t *testing.T) {
 			if !reflect.DeepEqual(nextIntFreshDerivationPath, expectedNextIntFreshDerivationPath) {
 				t.Fatalf("Next fresh internal index info = '%v', want = '%v'",
 					nextIntFreshDerivationPath, expectedNextIntFreshDerivationPath)
+			}
+
+			// mark first externals as used and create gap
+			used := [][]uint32{{0, 0}, {0, 1}, {0, 3}, {0, 6}}
+			for _, path := range used {
+				_, err = client.MarkAddressesAsUsed(ctx, &pb.MarkAddressesAsUsedRequest{
+					KeychainId: info.KeychainId,
+					Addresses:  []string{gotExtAddr.Addresses[path[1]].Address},
+				})
+				if err != nil {
+					t.Fatalf("failed to mark external addr as used - error = %v", err)
+				}
+			}
+			gotExtAddrAfterGap, err := client.GetFreshAddresses(
+				ctx, &pb.GetFreshAddressesRequest{
+					KeychainId: info.KeychainId,
+					Change:     pb.Change_CHANGE_EXTERNAL,
+					BatchSize:  5,
+				})
+			if err != nil {
+				t.Fatalf("failed to get fresh external addr - error = %v", err)
+			}
+			var paths [][]uint32
+			for _, addr := range gotExtAddrAfterGap.Addresses {
+				paths = append(paths, addr.Derivation)
+			}
+
+			expectedpaths := [][]uint32{{0, 2}, {0, 4}, {0, 5}, {0, 7}, {0, 8}}
+			if !reflect.DeepEqual(paths, expectedpaths) {
+				t.Fatalf("wrong paths: %v %v", paths, expectedpaths)
 			}
 
 			// Reset the keychain for this id
