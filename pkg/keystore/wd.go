@@ -100,6 +100,11 @@ func (s *WDKeystore) MarkPathAsUsed(id uuid.UUID, path DerivationPath) error {
 		return err
 	}
 
+	err = set(s.db, id.String(), meta)
+	if err != nil {
+		return err
+	}
+
 	return s.updateState(meta.Main)
 }
 
