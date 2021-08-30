@@ -35,7 +35,7 @@ RUN mage -v build
 FROM alpine
 
 RUN wget -O /bin/grpc_health_probe \
-    https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.5/grpc_health_probe-linux-386 /bin/grpc_health_probe \
+    https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v0.4.5/grpc_health_probe-linux-386 \
     && chmod +x /bin/grpc_health_probe
 COPY --from=builder /app/server /app/server
 
