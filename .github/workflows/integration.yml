@@ -50,7 +50,7 @@ jobs:
         run: ./lbs &
 
       - name: Start Redis
-        uses: supercharge/redis-github-action@1.1.0
+        uses: supercharge/redis-github-action@1.2.0
 
       - name: Run Buf checks
         uses: magefile/mage-action@v1
