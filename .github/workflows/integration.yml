@@ -8,8 +8,8 @@ on:
     branches:
       - '*'
 jobs:
-  build:
-    name: Go CI
+  integration:
+    name: Integration CI
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -20,17 +20,18 @@ jobs:
         with:
           go-version: 1.16
 
-      - name: Install mage
-        run: "pushd /tmp; git clone https://github.com/magefile/mage; pushd mage; go run bootstrap.go; popd; popd"
-
       - name: Install Protobuf compiler
         uses: arduino/setup-protoc@master
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v0.5.0
+        with:
+          version: '1.0.0-rc3'
+
       - name: Install Protobuf Go plugin
-        run: |
-          go get github.com/golang/protobuf/protoc-gen-go
+        run: go get github.com/golang/protobuf/protoc-gen-go
 
       - name: Check out bitcoin-lib-grpc
         uses: actions/checkout@master
@@ -38,19 +39,25 @@ jobs:
           repository: LedgerHQ/bitcoin-lib-grpc
           path: 'bitcoin-lib-grpc'
 
+      - name: Build bitcoin-lib-grpc
+        uses: magefile/mage-action@v1
+        with:
+          workdir: bitcoin-lib-grpc
+          args: -v build
+
       - name: Run bitcoin-lib-grpc in the background
-        run: |
-          pushd bitcoin-lib-grpc
-          mage -v build
-          ./lbs &
-          popd
+        working-directory: bitcoin-lib-grpc
+        run: ./lbs &
 
       - name: Start Redis
         uses: supercharge/redis-github-action@1.1.0
 
-      - name: Build
-        run: |
-          mage -v build
+      - name: Run Buf checks
+        uses: magefile/mage-action@v1
+        with:
+          args: -v proto
 
       - name: Run integration tests
-        run: mage -v integration
+        uses: magefile/mage-action@v1
+        with:
+          args: -v integration

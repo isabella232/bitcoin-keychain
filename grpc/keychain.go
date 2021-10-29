@@ -13,7 +13,9 @@ import (
 
 // Controller is a type that implements the pb.KeychainServiceServer
 // interface.
-type Controller struct{}
+type Controller struct {
+	pb.UnimplementedKeychainServiceServer
+}
 
 var store keystore.Keystore
 

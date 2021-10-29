@@ -1,0 +1,623 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "pb/keychain/service.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "KeychainService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/bitcoin/CreateKeychain": {
+      "post": {
+        "summary": "Create a new keychain by extended public key.",
+        "operationId": "KeychainService_CreateKeychain",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/keychainKeychainInfo"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainCreateKeychainRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/DeleteKeychain": {
+      "post": {
+        "summary": "Delete a keychain by UUID.",
+        "operationId": "KeychainService_DeleteKeychain",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainDeleteKeychainRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/GetAddressesPublicKeys": {
+      "post": {
+        "summary": "Get public keys corresponding of given derivation paths for a registered keychain.",
+        "operationId": "KeychainService_GetAddressesPublicKeys",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/keychainGetAddressesPublicKeysResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainGetAddressesPublicKeysRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/GetAllObservableAddresses": {
+      "post": {
+        "summary": "Get a list of all address that can be observed by the keychain.",
+        "operationId": "KeychainService_GetAllObservableAddresses",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/keychainGetAllObservableAddressesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainGetAllObservableAddressesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/GetFreshAddresses": {
+      "post": {
+        "summary": "Get fresh addresses for a registered keychain and the provided Change.",
+        "operationId": "KeychainService_GetFreshAddresses",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/keychainGetFreshAddressesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainGetFreshAddressesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/GetKeychainInfo": {
+      "post": {
+        "summary": "Get keychain metadata by UUID.",
+        "operationId": "KeychainService_GetKeychainInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/keychainKeychainInfo"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainGetKeychainInfoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/MarkAddressesAsUsed": {
+      "post": {
+        "summary": "Mark a batch of addresses as used.\nNOTE: address being marked as used MUST be observable.",
+        "operationId": "KeychainService_MarkAddressesAsUsed",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainMarkAddressesAsUsedRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    },
+    "/v1/bitcoin/ResetKeychain": {
+      "post": {
+        "summary": "Reset a keychain by UUID.",
+        "operationId": "KeychainService_ResetKeychain",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/keychainResetKeychainRequest"
+            }
+          }
+        ],
+        "tags": [
+          "KeychainService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "keychainAddressInfo": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "derivation": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "change": {
+          "$ref": "#/definitions/keychainChange"
+        }
+      }
+    },
+    "keychainBitcoinNetwork": {
+      "type": "string",
+      "enum": [
+        "BITCOIN_NETWORK_UNSPECIFIED",
+        "BITCOIN_NETWORK_MAINNET",
+        "BITCOIN_NETWORK_TESTNET3",
+        "BITCOIN_NETWORK_REGTEST"
+      ],
+      "default": "BITCOIN_NETWORK_UNSPECIFIED",
+      "description": "BitcoinNetwork enumerates the list of all supported Bitcoin networks. It\nalso indicates the coin for which the networks are defined, in this case,\nBitcoin.\n\nThis enum type may be used by gRPC clients to differentiate protocol\nbehaviour, magic numbers, addresses, keys, etc., for one network from those\nintended for use on another network."
+    },
+    "keychainChainParams": {
+      "type": "object",
+      "properties": {
+        "bitcoinNetwork": {
+          "$ref": "#/definitions/keychainBitcoinNetwork"
+        },
+        "litecoinNetwork": {
+          "$ref": "#/definitions/keychainLitecoinNetwork"
+        }
+      }
+    },
+    "keychainChange": {
+      "type": "string",
+      "enum": [
+        "CHANGE_UNSPECIFIED",
+        "CHANGE_EXTERNAL",
+        "CHANGE_INTERNAL"
+      ],
+      "default": "CHANGE_UNSPECIFIED",
+      "description": "Change is an enum type to indicate whether an address belongs to the\nexternal chain (receive) or the internal chain (change)."
+    },
+    "keychainCreateKeychainRequest": {
+      "type": "object",
+      "properties": {
+        "extendedPublicKey": {
+          "type": "string"
+        },
+        "fromChainCode": {
+          "$ref": "#/definitions/keychainFromChainCode"
+        },
+        "scheme": {
+          "$ref": "#/definitions/keychainScheme"
+        },
+        "lookaheadSize": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "chainParams": {
+          "$ref": "#/definitions/keychainChainParams"
+        },
+        "accountIndex": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "metadata": {
+          "type": "string",
+          "title": "optional backend dependent field\nIn case of \"wd\" type, we expect \"libcore_prefix:workspace\""
+        }
+      }
+    },
+    "keychainDeleteKeychainRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        }
+      }
+    },
+    "keychainDerivationPath": {
+      "type": "object",
+      "properties": {
+        "derivation": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "description": "Message to wrap a derivation path."
+    },
+    "keychainFromChainCode": {
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "string",
+          "format": "byte",
+          "description": "Serialized public key associated with the extended key derived\nat the account-level derivation path.\n\nBoth compressed as well as uncompressed public keys are accepted."
+        },
+        "chainCode": {
+          "type": "string",
+          "format": "byte",
+          "description": "Serialized chain code associated with the extended key derived at the\naccount-level derivation path.\n\nThis field is 32 bytes long."
+        },
+        "accountIndex": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Index at BIP32 level 3."
+        }
+      }
+    },
+    "keychainGetAddressesPublicKeysRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "description": "UUID representing the keychain."
+        },
+        "derivations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/keychainDerivationPath"
+          },
+          "description": "Given derivations to get serialized compressed public keys."
+        }
+      }
+    },
+    "keychainGetAddressesPublicKeysResponse": {
+      "type": "object",
+      "properties": {
+        "publicKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Serialized compressed public keys"
+        }
+      }
+    },
+    "keychainGetAllObservableAddressesRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        },
+        "change": {
+          "$ref": "#/definitions/keychainChange",
+          "description": "The chain on which the observable addresses must be returned.\nIf unspecified (CHANGE_UNSPECIFIED), return addresses observable on both\ninternal and external chains."
+        },
+        "fromIndex": {
+          "type": "integer",
+          "format": "int64",
+          "title": "Start address index"
+        },
+        "toIndex": {
+          "type": "integer",
+          "format": "int64",
+          "description": "End address index. If left unspecified, the maximum observable index\nwill be used as the ending address index."
+        }
+      }
+    },
+    "keychainGetAllObservableAddressesResponse": {
+      "type": "object",
+      "properties": {
+        "addresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/keychainAddressInfo"
+          }
+        }
+      }
+    },
+    "keychainGetFreshAddressesRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        },
+        "change": {
+          "$ref": "#/definitions/keychainChange",
+          "description": "The chain on which the fresh addresses must be issued on."
+        },
+        "batchSize": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of fresh addresses to derive."
+        }
+      }
+    },
+    "keychainGetFreshAddressesResponse": {
+      "type": "object",
+      "properties": {
+        "addresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/keychainAddressInfo"
+          }
+        }
+      }
+    },
+    "keychainGetKeychainInfoRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        }
+      }
+    },
+    "keychainKeychainInfo": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        },
+        "externalDescriptor": {
+          "type": "string",
+          "title": "External chain output descriptor of the keychain. It \"describes\" all\nexternal addresses that belong to the keychain.\nRef: https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md"
+        },
+        "internalDescriptor": {
+          "type": "string",
+          "description": "Internal chain output descriptor of the keychain. It \"describes\" all\ninternal addresses that belong to the keychain."
+        },
+        "extendedPublicKey": {
+          "type": "string",
+          "description": "Extended public key serialized with standard HD version bytes."
+        },
+        "slip32ExtendedPublicKey": {
+          "type": "string",
+          "title": "Extended public key serialized with SLIP-0132 HD version bytes.\nRef: https://github.com/satoshilabs/slips/blob/master/slip-0132.md"
+        },
+        "lookaheadSize": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Numerical size of the lookahead zone."
+        },
+        "scheme": {
+          "$ref": "#/definitions/keychainScheme"
+        },
+        "chainParams": {
+          "$ref": "#/definitions/keychainChainParams",
+          "description": "ChainParams network for which the keychain is defined.\n\nAlthough the network information can be inferred from the extended public\nkey, it is often not enough to differentiate between Testnet3 and Regtest\nnetworks, typically the case with the BIP84 scheme.\n\nThis field is mostly useful for encoding addresses for a specific\nnetwork."
+        }
+      }
+    },
+    "keychainLitecoinNetwork": {
+      "type": "string",
+      "enum": [
+        "LITECOIN_NETWORK_UNSPECIFIED",
+        "LITECOIN_NETWORK_MAINNET"
+      ],
+      "default": "LITECOIN_NETWORK_UNSPECIFIED"
+    },
+    "keychainMarkAddressesAsUsedRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Addresses to be marked as used"
+        }
+      }
+    },
+    "keychainResetKeychainRequest": {
+      "type": "object",
+      "properties": {
+        "keychainId": {
+          "type": "string",
+          "format": "byte",
+          "title": "UUID representing the keychain"
+        }
+      }
+    },
+    "keychainScheme": {
+      "type": "string",
+      "enum": [
+        "SCHEME_UNSPECIFIED",
+        "SCHEME_BIP44",
+        "SCHEME_BIP49",
+        "SCHEME_BIP84"
+      ],
+      "default": "SCHEME_UNSPECIFIED",
+      "description": "Scheme defines the scheme on which a keychain entry is based."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

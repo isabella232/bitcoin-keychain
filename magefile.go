@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -14,18 +13,16 @@ const (
 	entryPoint = "cmd/server.go"
 	ldFlags    = "-X $PACKAGE/version/version.commitHash=$COMMIT_HASH " +
 		"-X $PACKAGE/version/version.buildDate=$BUILD_DATE"
-	protoPlugins            = "plugins=grpc"
 	protoDir                = "pb"
 	protoKeychainFileName   = "keychain/service.proto"
 	protoGrpcClientFileName = "bitcoin/service.proto"
-	protoArtifactModule     = "github.com/ledgerhq/bitcoin-keychain/pb"
 )
 
 // Allow user to override executables on UNIX-like systems.
 var (
 	goexe  = "go"     // GOEXE=xxx mage build
 	protoc = "protoc" // PROTOC=xxx mage proto
-	buf    = "buf"    // BUF=xxx mage protolist
+	buf    = "buf"    // BUF=xxx mage proto
 )
 
 func init() {
@@ -47,29 +44,21 @@ func init() {
 }
 
 func Proto() error {
-	runner := func(proto string, dir string) error {
-		return sh.Run(protoc,
-			fmt.Sprintf("--go_out=%s:%s", protoPlugins, dir),       // protoc flags
-			fmt.Sprintf("%s/%s", dir, proto),                       // input .proto
-			fmt.Sprintf("--go_opt=module=%s", protoArtifactModule), // module output
-		)
-	}
-
-	if err := runner(protoKeychainFileName, protoDir); err != nil {
+	err := sh.Run(buf, "generate", "--template", "pb/keychain/buf.gen.yaml", "--path", "pb/keychain")
+	if err != nil {
 		return err
 	}
-
-	return runner(protoGrpcClientFileName, protoDir)
+	return sh.Run(buf, "generate", "--template", "pb/bitcoin/buf.gen.yaml", "--path", "pb/bitcoin")
 }
 
 func Buf() error {
 	// Verify if the proto files can be compiled.
-	if err := sh.Run(buf, "image", "build", "-o /dev/null"); err != nil {
+	if err := sh.Run(buf, "build"); err != nil {
 		return err
 	}
 
 	// Run Buf lint checks on the protobuf file.
-	if err := sh.Run(buf, "check", "lint"); err != nil {
+	if err := sh.Run(buf, "lint"); err != nil {
 		return err
 	}
 

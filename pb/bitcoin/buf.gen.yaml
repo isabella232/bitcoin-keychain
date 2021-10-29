@@ -1,0 +1,10 @@
+version: v1
+plugins:
+  - remote: buf.build/library/plugins/go:v1.27.1-1
+    out: pb
+    opt:
+      - module=github.com/ledgerhq/bitcoin-keychain/pb
+  - remote: buf.build/library/plugins/go-grpc:v1.1.0-2
+    out: pb
+    opt:
+      - module=github.com/ledgerhq/bitcoin-keychain/pb

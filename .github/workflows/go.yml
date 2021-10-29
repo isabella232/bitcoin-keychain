@@ -8,7 +8,7 @@ on:
     branches:
       - '*'
 jobs:
-  build:
+  go:
     name: Go CI
     runs-on: ubuntu-latest
     steps:
@@ -20,49 +20,41 @@ jobs:
         with:
           go-version: 1.16
 
-      - name: Install mage
-        run: "pushd /tmp; git clone https://github.com/magefile/mage; pushd mage; go run bootstrap.go; popd; popd"
-
-      - name: Install golangci-lint
-        run: "curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.41.1"
-
       - name: Install Protobuf compiler
         uses: arduino/setup-protoc@master
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Protobuf Go plugin
-        run: |
-          go get github.com/golang/protobuf/protoc-gen-go
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v0.5.0
+        with:
+          version: '1.0.0-rc3'
 
-      - name: Install Buf compiler
-        env:
-          BUF_VERSION: "0.20.1"
-          BUF: "/var/tmp/buf"
-        run: |
-          UNAME_OS=$(uname -s)
-          UNAME_ARCH=$(uname -m)
-
-          wget "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-${UNAME_OS}-${UNAME_ARCH}" -O ${BUF}
-          chmod +x ${BUF}
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.42.1
 
       - name: Run Buf checks
-        env:
-          BUF: "/var/tmp/buf"
-        run: mage -v buf
+        uses: magefile/mage-action@v1
+        with:
+          args: -v buf
 
       - name: Build
-        run: |
-          mage -v build
+        uses: magefile/mage-action@v1
+        with:
+          args: -v build
 
-      - name: Run golangci-lint
-        run: |
-          mage -v lint
+      - name: Run code linting
+        uses: magefile/mage-action@v1
+        with:
+          args: -v lint
 
       - name: Test (with -race flag)
-        run: mage -v testracecover
+        uses: magefile/mage-action@v1
+        with:
+          args: -v testracecover
 
-      - uses: codecov/codecov-action@v1
+      - name: Code coverage
+        uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
