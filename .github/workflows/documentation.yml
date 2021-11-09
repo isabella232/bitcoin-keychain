@@ -1,0 +1,21 @@
+name: Generate documentation
+on:
+  push:
+
+jobs:
+  plantuml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v2
+
+      - name: generate png diagrams
+        uses: Timmy/plantuml-action@v1
+        with:
+          args: "-tpng doc/*.puml"
+
+      - name: push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "[bot] update diagrams"
+          file_pattern: "doc/*.png"
