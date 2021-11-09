@@ -18,8 +18,37 @@ The [interface](pb/keychain/service.proto) is defined as protobuf
 
 ## [C4Model](https://c4model.com) Architecture
 
+### Context diagram
 
 ![context](doc/c4_context.png)
+
+### Container diagram
+
+![container](doc/c4_container.png)
+
+### Dynamic diagram
+
+![dynamic](doc/c4_dynamic.png)
+
+When a new account is registered, the keychain has to be called on
+[CreateKeychain](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L11)
+with the [xpub and some other information](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L102)
+This methods returns a keychain id (among other informations). It is a UUID
+randomly created. This UUID will be needed for all subsequent communication, so
+all keychain client needs to store it.
+
+When this is done, the LAMA btc worker needs to regularly maintains the
+address usage status with [MarkAddressesAsUsed](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L24)
+This method needs a list of addresses and the keychain id.
+This is typically done after scanning the explorer or after a new transaction
+
+When new addresses are needed, either for receiving fund or for UTXO, the
+keychain client can call one of
+[GetFreshAddresses](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L27)
+or [GetAllObservableAddresses](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L30)
+
+
+### Notes
 
 Data can be stored in different backend:
  - redis
@@ -60,25 +89,3 @@ The keychain is used by [lama](https://github.com/LedgerHQ/lama)
 The keychain use [lib-grpc](https://github.com/LedgerHQ/bitcoin-lib-grpc/) for
 Hierarchical Deterministic Wallets computation (lib-grpc uses
 [btcsuite](https://github.com/btcsuite/btcutil) itself)
-
-## Workflow
-
-The keychain is part of the LAMA suite. It provides services related to btc
-addresses management.
-
-When a new account is registered, the keychain has to be called on
-[CreateKeychain](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L11)
-with the [xpub and some other information](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L102)
-This methods returns a keychain id (among other informations). It is a UUID
-randomly created. This UUID will be needed for all subsequent communication, so
-all keychain client needs to store it.
-
-When this is done, the LAMA btc worker needs to regularly maintains the
-address usage status with [MarkAddressesAsUsed](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L24)
-This method needs a list of addresses and the keychain id.
-This is typically done after scanning the explorer or after a new transaction
-
-When new addresses are needed, either for receiving fund or for UTXO, the
-keychain client can call one of
-[GetFreshAddresses](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L27)
-or [GetAllObservableAddresses](https://github.com/LedgerHQ/bitcoin-keychain/blob/0.5.2/pb/keychain/service.proto#L30)

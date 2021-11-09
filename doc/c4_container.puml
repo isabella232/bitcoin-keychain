@@ -1,0 +1,23 @@
+@startuml
+title Container diagram: Bitcoin Keychain in Lama
+
+!include <c4/C4_Container.puml>
+
+System_Boundary(keychain, "Keychain") {
+  Container(bitcoin_keychain, "keychain grpc service", "Go", "grpc entrypoint")
+  Container(bitcoin_lib_grpc, "bitcoin-lib grpc service", "Go (separate repo)", "compute derivation based on btcsuite")
+  Container(redisnative, "database", "redis database", "store address status")
+  Container(memory, "database", "in memory database", "store address status (dev and test only)")
+}
+
+System_Ext(lama, "Cria", "synchronise account and broadcast transactions")
+System_Ext(rediswd, "redis database", "store address status in wallet daemon format")
+
+Rel(lama, bitcoin_keychain, "get fresh address from xpub and mark address as used")
+Rel(bitcoin_keychain, bitcoin_lib_grpc, "compute bitcoin derivation")
+Rel(bitcoin_keychain, redisnative, "store addresses status")
+Rel(bitcoin_keychain, memory, "store addresses status")
+Rel(bitcoin_keychain, rediswd, "store addresses status")
+
+
+@endumlq

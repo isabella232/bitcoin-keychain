@@ -1,0 +1,22 @@
+@startuml
+title Dynamic diagram: Bitcoin Keychain in Lama
+
+!include <c4/C4_Dynamic.puml>
+
+Component(vault, "vault")
+Component(lama, "cria", "worker")
+Component(keychain, "keychain", "grpc")
+Component_Ext(explorer, "explorer")
+
+Rel(vault, lama, "create account")
+Rel(lama, keychain, "CreateKeychain(xpub, account_index, ...)")
+Rel(keychain, lama, "random UUID")
+Rel(lama, explorer, "fetch new transactions")
+Rel(lama, keychain, "MarkAddressesAsUsed(UUID, addresses)")
+
+Component(lama_rx, "cria", "worker")
+Component(keychain_rx, "keychain", "grpc")
+Rel(vault, lama_rx, "new address to receive fund")
+Rel(lama_rx, keychain_rx, "GetFreshAddresses")
+
+@endumlq
