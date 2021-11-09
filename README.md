@@ -16,9 +16,10 @@ to check the address associated to the path belong to the account (not asked by 
 
 The [interface](pb/keychain/service.proto) is defined as protobuf
 
-## Architecture
+## [C4Model](https://c4model.com) Architecture
 
-![archi](doc/archi.png)
+
+![context](doc/c4_context.png)
 
 Data can be stored in different backend:
  - redis

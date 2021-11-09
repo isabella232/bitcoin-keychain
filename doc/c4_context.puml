@@ -1,0 +1,19 @@
+@startuml
+title Context view: Bitcoin Keychain in Lama
+
+!include <c4/C4_Container.puml>
+
+System(keychain, "Lama Keychain", "GRPC service to maintain mapping between xpub and BTC addresses")
+
+System_Ext(vault, "Vault", "Ledger's B2B SaaS for companies to manage their cryptocurrencies.")
+System_Ext(cataplasm, "Cataplasm", "Gateway for the vault to new lama services")
+System_Ext(lama, "Cria", "synchronise account and broadcast transactions")
+System_Ext(explorer, "explorer", "communicate with blockchain")
+System_Ext(redis, "Redis database", "Store derivated addresses")
+
+Rel(vault, cataplasm, "fetch transactions, accounts balance and send transactions")
+Rel(cataplasm, lama, "fetch transactions and accounts balance")
+Rel(keychain, redis, "save derivation result and address usage")
+Rel_R(lama, explorer, "broadcast or fetch transactions")
+Rel(lama, keychain, "get fresh address from xpub and mark address as used")
+@endumlq
