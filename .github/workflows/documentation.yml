@@ -3,7 +3,7 @@ on:
   push:
 
 jobs:
-  plantuml:
+  generate_doc:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
@@ -14,8 +14,23 @@ jobs:
         with:
           args: "-tpng doc/*.puml"
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v0.5.0
+        with:
+          version: '1.0.0-rc3'
+
+      - name: generate swagger
+        uses: magefile/mage-action@v1
+        with:
+          args: -v proto
+
       - name: push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "[bot] update diagrams"
-          file_pattern: "doc/*.png"
+          commit_message: "[bot] update documentation"
+          file_pattern: "doc/*.png pb/*/*.swagger.json"
