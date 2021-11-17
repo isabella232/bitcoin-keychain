@@ -66,6 +66,14 @@ You have to choose which backend with the environment variable `STORE_TYPE`
 All data stored can be recalculated from `xpub`s at the price of a costly
 computation, so you can see this component as a cache.
 
+## Build
+
+You need [buf](https://docs.buf.build/installation) and [mage](https://github.com/magefile/mage)
+
+```
+$ mage build
+```
+
 ## Tests
 
 We have unittest and integration test
