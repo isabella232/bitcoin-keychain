@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"reflect"
-	"github.com/ledgerhq/bitcoin-keychain/log"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/ledgerhq/bitcoin-keychain/log"
 	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 	"github.com/ledgerhq/bitcoin-keychain/pkg/chaincfg"
 )
