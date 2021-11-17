@@ -149,3 +149,29 @@ func get(c *redis.Client, key string, dest interface{}) error {
 	log.Debug(fmt.Sprintf("Getting redis key[%s]:[%s]", key, dest))
 	return err
 }
+
+type redisTransaction struct {
+	context context.Context
+	pipe    redis.Pipeliner
+}
+
+func newRedisTransaction(db *redis.Client) *redisTransaction {
+	return &redisTransaction{
+		context: context.Background(),
+		pipe:    db.TxPipeline(),
+	}
+}
+
+func (r *redisTransaction) set(key string, value interface{}) error {
+	redisValue, err := marshall(value)
+	if err != nil {
+		return err
+	}
+
+	return r.pipe.Set(r.context, key, redisValue, 0).Err()
+}
+
+func (r *redisTransaction) exec() error {
+	_, err := r.pipe.Exec(r.context)
+	return err
+}

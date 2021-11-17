@@ -55,17 +55,23 @@ func (s *WDKeystore) GetFreshAddresses(id uuid.UUID, change Change, size uint32)
 		return addrs, err
 	}
 
-	err = s.updateAddresses(meta.Main, addrs)
+	redistx := newRedisTransaction(s.db)
+
+	err = s.updateAddresses(redistx, meta.Main, addrs)
 	if err != nil {
 		return []AddressInfo{}, err
 	}
 
-	err = s.updateState(meta.Main)
+	err = s.updateState(redistx, meta.Main)
 	if err != nil {
 		return []AddressInfo{}, err
 	}
 
-	if err := set(s.db, id.String(), meta); err != nil {
+	if err := redistx.set(id.String(), meta); err != nil {
+		return []AddressInfo{}, err
+	}
+
+	if err := redistx.exec(); err != nil {
 		return []AddressInfo{}, err
 	}
 
@@ -85,12 +91,19 @@ func (s *WDKeystore) MarkPathAsUsed(id uuid.UUID, path DerivationPath) error {
 		return err
 	}
 
-	err = set(s.db, id.String(), meta)
+	redistx := newRedisTransaction(s.db)
+
+	err = redistx.set(id.String(), meta)
 	if err != nil {
 		return err
 	}
 
-	return s.updateState(meta.Main)
+	err = s.updateState(redistx, meta.Main)
+	if err != nil {
+		return err
+	}
+
+	return redistx.exec()
 }
 
 func (s *WDKeystore) GetAllObservableAddresses(
@@ -110,17 +123,24 @@ func (s *WDKeystore) GetAllObservableAddresses(
 		return nil, err
 	}
 
-	err = set(s.db, id.String(), meta)
+	redistx := newRedisTransaction(s.db)
+
+	err = redistx.set(id.String(), meta)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.updateState(meta.Main)
+	err = s.updateState(redistx, meta.Main)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.updateAddresses(meta.Main, addrs)
+	err = s.updateAddresses(redistx, meta.Main, addrs)
+	if err != nil {
+		return nil, err
+	}
+
+	err = redistx.exec()
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +152,7 @@ func (s *WDKeystore) MarkAddressAsUsed(id uuid.UUID, address string) error {
 	return keystoreMarkAddressAsUsed(s, id, address)
 }
 
-func (s *WDKeystore) updateState(keychainInfo KeychainInfo) error {
+func (s *WDKeystore) updateState(redistx *redisTransaction, keychainInfo KeychainInfo) error {
 	wdkey, err := keychainInfoToWDKey(keychainInfo)
 	if err != nil {
 		return err
@@ -142,10 +162,10 @@ func (s *WDKeystore) updateState(keychainInfo KeychainInfo) error {
 		return err
 	}
 
-	return set(s.db, stateKey, stateValue)
+	return redistx.set(stateKey, stateValue)
 }
 
-func (s *WDKeystore) updateAddresses(keychainInfo KeychainInfo, addrs []AddressInfo) error {
+func (s *WDKeystore) updateAddresses(redistx *redisTransaction, keychainInfo KeychainInfo, addrs []AddressInfo) error {
 	wdkey, err := keychainInfoToWDKey(keychainInfo)
 	if err != nil {
 		return err
@@ -156,7 +176,7 @@ func (s *WDKeystore) updateAddresses(keychainInfo KeychainInfo, addrs []AddressI
 			return ErrKeychainNotFound
 		}
 		for k, v := range kv {
-			if err := set(s.db, k, v); err != nil {
+			if err := redistx.set(k, v); err != nil {
 				return err
 			}
 		}
