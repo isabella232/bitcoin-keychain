@@ -3,10 +3,13 @@ package keystore
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+
 	"reflect"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/ledgerhq/bitcoin-keychain/log"
 	"github.com/ledgerhq/bitcoin-keychain/pb/bitcoin"
 	"github.com/ledgerhq/bitcoin-keychain/pkg/chaincfg"
 )
@@ -114,6 +117,7 @@ func set(c *redis.Client, key string, value interface{}) error {
 		redisValue = string(p)
 	}
 
+	log.Debug(fmt.Sprintf("Setting redis key[%s]:[%s]", key, value))
 	return c.Set(context.Background(), key, redisValue, 0).Err()
 }
 
@@ -128,5 +132,6 @@ func get(c *redis.Client, key string, dest interface{}) error {
 		va := reflect.ValueOf(p)
 		reflect.ValueOf(dest).Elem().Set(va)
 	}
+	log.Debug(fmt.Sprintf("Getting redis key[%s]:[%s]", key, dest))
 	return nil
 }
