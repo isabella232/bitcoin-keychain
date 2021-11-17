@@ -103,7 +103,16 @@ func (s *baseRedisKeystore) GetAddressesPublicKeys(id uuid.UUID, derivations []D
 	return meta.keystoreGetAddressesPublicKeys(derivations)
 }
 
-func set(c *redis.Client, key string, value interface{}) error {
+func unmarshall(val string, dest interface{}) error {
+	err := json.Unmarshal([]byte(val), dest)
+	if err != nil {
+		va := reflect.ValueOf(val)
+		reflect.ValueOf(dest).Elem().Set(va)
+	}
+	return nil
+}
+
+func marshall(value interface{}) (string, error) {
 	var redisValue string
 
 	v, ok := value.(string)
@@ -112,9 +121,18 @@ func set(c *redis.Client, key string, value interface{}) error {
 	} else {
 		p, err := json.Marshal(value)
 		if err != nil {
-			return err
+			return "", err
 		}
 		redisValue = string(p)
+	}
+	return redisValue, nil
+}
+
+func set(c *redis.Client, key string, value interface{}) error {
+	redisValue, err := marshall(value)
+
+	if err != nil {
+		return err
 	}
 
 	log.Debug(fmt.Sprintf("Setting redis key[%s]:[%s]", key, value))
@@ -127,11 +145,7 @@ func get(c *redis.Client, key string, dest interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal([]byte(p), dest)
-	if err != nil {
-		va := reflect.ValueOf(p)
-		reflect.ValueOf(dest).Elem().Set(va)
-	}
+	err = unmarshall(p, dest)
 	log.Debug(fmt.Sprintf("Getting redis key[%s]:[%s]", key, dest))
-	return nil
+	return err
 }
