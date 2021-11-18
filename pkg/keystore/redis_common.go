@@ -30,32 +30,6 @@ func (s *baseRedisKeystore) Get(id uuid.UUID) (KeychainInfo, error) {
 	return meta.Main, nil
 }
 
-func (s *baseRedisKeystore) Delete(id uuid.UUID) error {
-	var meta Meta
-
-	err := get(s.db, id.String(), &meta)
-	if err != nil {
-		return ErrKeychainNotFound
-	}
-
-	s.db.Del(context.Background(), id.String())
-
-	return nil
-}
-
-func (s *baseRedisKeystore) Reset(id uuid.UUID) error {
-	var meta Meta
-
-	err := get(s.db, id.String(), &meta)
-	if err != nil {
-		return ErrKeychainNotFound
-	}
-
-	meta.ResetKeychainMeta()
-
-	return set(s.db, id.String(), meta)
-}
-
 func (s *baseRedisKeystore) Create(
 	extendedPublicKey string, fromChainCode *FromChainCode, scheme Scheme,
 	net chaincfg.Network, lookaheadSize uint32, index uint32, metadata string,
@@ -169,6 +143,10 @@ func (r *redisTransaction) set(key string, value interface{}) error {
 	}
 
 	return r.pipe.Set(r.context, key, redisValue, 0).Err()
+}
+
+func (r *redisTransaction) del(key string) error {
+	return r.pipe.Del(r.context, key, key).Err()
 }
 
 func (r *redisTransaction) exec() error {

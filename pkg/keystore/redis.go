@@ -35,6 +35,32 @@ func NewRedisKeystore(redisOpts *redis.Options) (*RedisKeystore, error) {
 	return &RedisKeystore{baseKeystore}, nil
 }
 
+func (s *RedisKeystore) Delete(id uuid.UUID) error {
+	var meta Meta
+
+	err := get(s.db, id.String(), &meta)
+	if err != nil {
+		return ErrKeychainNotFound
+	}
+
+	s.db.Del(context.Background(), id.String())
+
+	return nil
+}
+
+func (s *RedisKeystore) Reset(id uuid.UUID) error {
+	var meta Meta
+
+	err := get(s.db, id.String(), &meta)
+	if err != nil {
+		return ErrKeychainNotFound
+	}
+
+	meta.ResetKeychainMeta()
+
+	return set(s.db, id.String(), meta)
+}
+
 func (s *RedisKeystore) GetFreshAddress(id uuid.UUID, change Change) (*AddressInfo, error) {
 	addrs, err := s.GetFreshAddresses(id, change, 1)
 	if err != nil {
