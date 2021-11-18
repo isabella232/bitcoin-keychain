@@ -92,6 +92,60 @@ func NewMockInMemoryKeystore() Keystore {
 	}
 }
 
+func TestInMemoryKeystore_UUID(t *testing.T) {
+	test := struct {
+		name          string
+		extendedKey   string
+		fromChainCode *FromChainCode
+		scheme        Scheme
+		network       chaincfg.Network
+		index         uint32
+		info          string
+	}{
+		name:        "native segwit",
+		extendedKey: "xpub1111",
+		scheme:      BIP84,
+		network:     chaincfg.BitcoinMainnet,
+		index:       1,
+		info:        "",
+	}
+
+	keystore := NewMockInMemoryKeystore()
+
+	info1, err := keystore.Create(
+		test.extendedKey, test.fromChainCode, test.scheme, test.network,
+		DefaultLookaheadSize, test.index, test.info,
+	)
+	if err != nil {
+		t.Fatalf("Create() unexpected error: %v", err)
+	}
+
+	info2, err := keystore.Create(
+		test.extendedKey, test.fromChainCode, test.scheme, test.network,
+		DefaultLookaheadSize, test.index, test.info,
+	)
+	if err != nil {
+		t.Fatalf("Create() unexpected error: %v", err)
+	}
+
+	if !reflect.DeepEqual(info1, info2) {
+		t.Fatalf("UUID must be the same")
+	}
+
+	info3, err := keystore.Create(
+		"xpub2222", test.fromChainCode, test.scheme, test.network,
+		DefaultLookaheadSize, test.index, test.info,
+	)
+
+	if err != nil {
+		t.Fatalf("Create() unexpected error: %v", err)
+	}
+
+	if reflect.DeepEqual(info1, info3) {
+		t.Fatalf("UUID must be different")
+	}
+}
+
 func TestInMemoryKeystore_GetCreate(t *testing.T) {
 	tests := []struct {
 		name          string

@@ -366,6 +366,20 @@ func (m *Meta) ResetKeychainMeta() {
 	m.Addresses = map[string]DerivationPath{}
 }
 
+// generate a namespace name-based uuid (version 5) from keychain input
+func uuidFromInput(
+	extendedPublicKey string,
+	scheme Scheme,
+) (uuid.UUID, error) {
+	// This will be our namespace (randomly chosen with uuidgen)
+	// Never change it or you will get different uuid from the same input.
+	// For more information see https://www.rfc-editor.org/rfc/rfc4122.html#section-4.3
+	namespace, _ := uuid.Parse("87f38b13-7215-4fb9-8155-5ee05e1cb61b")
+	key := fmt.Sprintf("%s%s", extendedPublicKey, scheme)
+
+	return uuid.NewSHA1(namespace, []byte(key)), nil
+}
+
 func keystoreCreate(
 	extendedPublicKey string,
 	fromChainCode *FromChainCode,
@@ -410,7 +424,11 @@ func keystoreCreate(
 			err, "failed to derive xpub %v at index %v", extendedPublicKey, 1)
 	}
 
-	id := uuid.New()
+	id, err := uuidFromInput(extendedPublicKey, scheme)
+	if err != nil {
+		return Meta{}, errors.Wrapf(
+			err, "cannot generate uuid")
+	}
 
 	keychainInfo := KeychainInfo{
 		ID:                          id,
