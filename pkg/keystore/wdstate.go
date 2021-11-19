@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
+	"fmt"
 	"io"
+
+	"github.com/ledgerhq/bitcoin-keychain/log"
 )
 
 // match https://github.com/LedgerHQ/lib-ledger-core/blob/4.2.0/core/src/wallet/bitcoin/keychains/CommonBitcoinLikeKeychains.hpp#L42
@@ -79,6 +82,19 @@ func ParseKeychainState(b64pref string) (WDKeychainState, error) {
 }
 
 func EncodeKeychainState(state WDKeychainState) (string, error) {
+	log.Debug(fmt.Sprintf(
+		"Encoding Keychain State for WD:"+
+			"\tmaxConsecutiveChangeIndex=%d"+
+			"\tmaxConsecutiveReceiveIndex=%d"+
+			"\tnonConsecutiveChangeIndexes=%v"+
+			"\tnonConsecutiveReceiveIndexes=%v"+
+			"\tempty=%t",
+		state.maxConsecutiveChangeIndex,
+		state.maxConsecutiveReceiveIndex,
+		state.nonConsecutiveChangeIndexes,
+		state.nonConsecutiveReceiveIndexes,
+		state.empty))
+
 	var buffer bytes.Buffer
 
 	var version uint32
@@ -107,8 +123,7 @@ func EncodeKeychainState(state WDKeychainState) (string, error) {
 		return "", err
 	}
 
-	empty := false
-	err = binary.Write(&buffer, binary.LittleEndian, empty)
+	err = binary.Write(&buffer, binary.LittleEndian, state.empty)
 	if err != nil {
 		return "", err
 	}

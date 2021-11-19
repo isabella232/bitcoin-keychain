@@ -117,7 +117,7 @@ func set(c *redis.Client, key string, value interface{}) error {
 		redisValue = string(p)
 	}
 
-	log.Debug(fmt.Sprintf("Setting redis key[%s]:[%s]", key, value))
+	log.Debug(fmt.Sprintf("Setting redis key[%s]:[%s]", key, redisValue))
 	return c.Set(context.Background(), key, redisValue, 0).Err()
 }
 
