@@ -124,15 +124,27 @@ func get(c *redis.Client, key string, dest interface{}) error {
 	return err
 }
 
+type redisContext struct {
+	context context.Context
+	db      *redis.Client
+}
+
 type redisTransaction struct {
 	context context.Context
 	pipe    redis.Pipeliner
 }
 
-func newRedisTransaction(db *redis.Client) *redisTransaction {
-	return &redisTransaction{
+func newRedisContext(db *redis.Client) *redisContext {
+	return &redisContext{
 		context: context.Background(),
-		pipe:    db.TxPipeline(),
+		db:      db,
+	}
+}
+
+func newRedisTransaction(redisContext *redisContext, tx *redis.Tx) *redisTransaction {
+	return &redisTransaction{
+		context: redisContext.context,
+		pipe:    tx.TxPipeline(),
 	}
 }
 
@@ -152,4 +164,8 @@ func (r *redisTransaction) del(key string) error {
 func (r *redisTransaction) exec() error {
 	_, err := r.pipe.Exec(r.context)
 	return err
+}
+
+func (r *redisContext) watch(fn func(*redis.Tx) error, key string) error {
+	return r.db.Watch(r.context, fn, key)
 }

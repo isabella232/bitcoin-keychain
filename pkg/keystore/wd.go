@@ -35,74 +35,87 @@ func NewWDKeystore(redisOpts *redis.Options) (*WDKeystore, error) {
 }
 
 func (s *WDKeystore) Delete(id uuid.UUID) error {
-	var meta Meta
+	redisContext := newRedisContext(s.db)
 
-	err := get(s.db, id.String(), &meta)
+	redisUpdate := func(tx *redis.Tx) error {
+		var meta Meta
 
-	if err != nil {
-		return ErrKeychainNotFound
-	}
+		err := get(s.db, id.String(), &meta)
 
-	var addresses []AddressInfo
-
-	for addr, path := range meta.Addresses {
-		addrInfo := AddressInfo{
-			Address:    addr,
-			Derivation: path,
+		if err != nil {
+			return ErrKeychainNotFound
 		}
-		addresses = append(addresses, addrInfo)
+
+		var addresses []AddressInfo
+
+		for addr, path := range meta.Addresses {
+			addrInfo := AddressInfo{
+				Address:    addr,
+				Derivation: path,
+			}
+			addresses = append(addresses, addrInfo)
+		}
+
+		redistx := newRedisTransaction(redisContext, tx)
+		if err := s.deleteAddresses(redistx, meta.Main, addresses); err != nil {
+			return err
+		}
+
+		if err := s.deleteState(redistx, meta.Main); err != nil {
+			return err
+		}
+
+		if err := redistx.del(id.String()); err != nil {
+			return err
+		}
+
+		return redistx.exec()
 	}
 
-	redistx := newRedisTransaction(s.db)
-	if err := s.deleteAddresses(redistx, meta.Main, addresses); err != nil {
-		return err
-	}
-
-	if err := s.deleteState(redistx, meta.Main); err != nil {
-		return err
-	}
-
-	if err := redistx.del(id.String()); err != nil {
-		return err
-	}
-
-	return redistx.exec()
+	return redisContext.watch(redisUpdate, id.String())
 }
 
 func (s *WDKeystore) Reset(id uuid.UUID) error {
-	var meta Meta
+	redisContext := newRedisContext(s.db)
 
-	err := get(s.db, id.String(), &meta)
-	if err != nil {
-		return ErrKeychainNotFound
-	}
+	redisUpdate := func(tx *redis.Tx) error {
+		var meta Meta
 
-	var addresses []AddressInfo
-
-	for addr, path := range meta.Addresses {
-		addrInfo := AddressInfo{
-			Address:    addr,
-			Derivation: path,
-			Change:     External,
+		err := get(s.db, id.String(), &meta)
+		if err != nil {
+			return ErrKeychainNotFound
 		}
-		addresses = append(addresses, addrInfo)
+
+		var addresses []AddressInfo
+
+		for addr, path := range meta.Addresses {
+			addrInfo := AddressInfo{
+				Address:    addr,
+				Derivation: path,
+				Change:     External,
+			}
+			addresses = append(addresses, addrInfo)
+		}
+
+		redistx := newRedisTransaction(redisContext, tx)
+
+		if err := s.deleteAddresses(redistx, meta.Main, addresses); err != nil {
+			return err
+		}
+		if err := s.deleteState(redistx, meta.Main); err != nil {
+			return err
+		}
+
+		meta.ResetKeychainMeta()
+
+		if err := redistx.set(id.String(), meta); err != nil {
+			return err
+		}
+
+		return redistx.exec()
 	}
 
-	redistx := newRedisTransaction(s.db)
-	if err := s.deleteAddresses(redistx, meta.Main, addresses); err != nil {
-		return err
-	}
-	if err := s.deleteState(redistx, meta.Main); err != nil {
-		return err
-	}
-
-	meta.ResetKeychainMeta()
-
-	if err := redistx.set(id.String(), meta); err != nil {
-		return err
-	}
-
-	return redistx.exec()
+	return redisContext.watch(redisUpdate, id.String())
 }
 
 func (s *WDKeystore) GetFreshAddress(id uuid.UUID, change Change) (*AddressInfo, error) {
@@ -114,109 +127,139 @@ func (s *WDKeystore) GetFreshAddress(id uuid.UUID, change Change) (*AddressInfo,
 }
 
 func (s *WDKeystore) GetFreshAddresses(id uuid.UUID, change Change, size uint32) ([]AddressInfo, error) {
-	var meta Meta
+	var res []AddressInfo
 
-	err := get(s.db, id.String(), &meta)
+	redisContext := newRedisContext(s.db)
+
+	redisUpdate := func(tx *redis.Tx) error {
+		var meta Meta
+		err := get(s.db, id.String(), &meta)
+		if err != nil {
+			return err
+		}
+
+		addrs, err := meta.keystoreGetFreshAddresses(s.client, change, size)
+		if err != nil {
+			return err
+		}
+
+		redistx := newRedisTransaction(redisContext, tx)
+
+		err = s.updateAddresses(redistx, meta.Main, addrs)
+		if err != nil {
+			return err
+		}
+
+		err = s.updateState(redistx, meta.Main)
+		if err != nil {
+			return err
+		}
+
+		if err := redistx.set(id.String(), meta); err != nil {
+			return err
+		}
+
+		if err := redistx.exec(); err != nil {
+			return err
+		}
+		res = addrs
+		return nil
+	}
+
+	err := redisContext.watch(redisUpdate, id.String())
 	if err != nil {
-		return []AddressInfo{}, ErrKeychainNotFound
+		return nil, err
 	}
 
-	addrs, err := meta.keystoreGetFreshAddresses(s.client, change, size)
-	if err != nil {
-		return addrs, err
-	}
-
-	redistx := newRedisTransaction(s.db)
-
-	err = s.updateAddresses(redistx, meta.Main, addrs)
-	if err != nil {
-		return []AddressInfo{}, err
-	}
-
-	err = s.updateState(redistx, meta.Main)
-	if err != nil {
-		return []AddressInfo{}, err
-	}
-
-	if err := redistx.set(id.String(), meta); err != nil {
-		return []AddressInfo{}, err
-	}
-
-	if err := redistx.exec(); err != nil {
-		return []AddressInfo{}, err
-	}
-
-	return addrs, nil
+	return res, nil
 }
 
 func (s *WDKeystore) MarkPathAsUsed(id uuid.UUID, path DerivationPath) error {
-	var meta Meta
+	redisContext := newRedisContext(s.db)
 
-	err := get(s.db, id.String(), &meta)
-	if err != nil {
-		return ErrKeychainNotFound
+	redisUpdate := func(tx *redis.Tx) error {
+		var meta Meta
+
+		err := get(s.db, id.String(), &meta)
+		if err != nil {
+			return ErrKeychainNotFound
+		}
+
+		err = meta.keystoreMarkPathAsUsed(path)
+		if err != nil {
+			return err
+		}
+
+		redistx := newRedisTransaction(redisContext, tx)
+
+		err = redistx.set(id.String(), meta)
+		if err != nil {
+			return err
+		}
+
+		err = s.updateState(redistx, meta.Main)
+		if err != nil {
+			return err
+		}
+
+		return redistx.exec()
 	}
 
-	err = meta.keystoreMarkPathAsUsed(path)
-	if err != nil {
-		return err
-	}
-
-	redistx := newRedisTransaction(s.db)
-
-	err = redistx.set(id.String(), meta)
-	if err != nil {
-		return err
-	}
-
-	err = s.updateState(redistx, meta.Main)
-	if err != nil {
-		return err
-	}
-
-	return redistx.exec()
+	return redisContext.watch(redisUpdate, id.String())
 }
 
 func (s *WDKeystore) GetAllObservableAddresses(
 	id uuid.UUID, change Change, fromIndex uint32, toIndex uint32,
 ) ([]AddressInfo, error) {
-	var meta Meta
+	var res []AddressInfo
 
-	err := get(s.db, id.String(), &meta)
-	if err != nil {
-		return nil, ErrKeychainNotFound
+	redisContext := newRedisContext(s.db)
+
+	redisUpdate := func(tx *redis.Tx) error {
+		var meta Meta
+
+		err := get(s.db, id.String(), &meta)
+		if err != nil {
+			return ErrKeychainNotFound
+		}
+
+		addrs, err := meta.keystoreGetAllObservableAddresses(
+			s.client, change, fromIndex, toIndex,
+		)
+		if err != nil {
+			return err
+		}
+
+		redistx := newRedisTransaction(redisContext, tx)
+
+		err = redistx.set(id.String(), meta)
+		if err != nil {
+			return err
+		}
+
+		err = s.updateState(redistx, meta.Main)
+		if err != nil {
+			return err
+		}
+
+		err = s.updateAddresses(redistx, meta.Main, addrs)
+		if err != nil {
+			return err
+		}
+
+		if err := redistx.exec(); err != nil {
+			return err
+		}
+
+		res = addrs
+		return nil
 	}
-
-	addrs, err := meta.keystoreGetAllObservableAddresses(
-		s.client, change, fromIndex, toIndex,
-	)
+	err := redisContext.watch(redisUpdate, id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	redistx := newRedisTransaction(s.db)
-
-	err = redistx.set(id.String(), meta)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.updateState(redistx, meta.Main)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.updateAddresses(redistx, meta.Main, addrs)
-	if err != nil {
-		return nil, err
-	}
-
-	err = redistx.exec()
-	if err != nil {
-		return nil, err
-	}
-
-	return addrs, nil
+	return res, nil
 }
 
 func (s *WDKeystore) MarkAddressAsUsed(id uuid.UUID, address string) error {
