@@ -1,0 +1,16 @@
+on: [push]
+jobs:
+  generate-doc:
+    runs-on: ubuntu-latest
+    name: Generate documentation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Generate documentation
+        uses: LedgerHQ/proto-gendoc-action@v0.1.0
+        with:
+          api-name: Bitcoin Keychain
+          api-version: 1.0.0
+          proto-root-dir: ./pb
+      - name: Print documentation
+        run: cat openapi.yaml
