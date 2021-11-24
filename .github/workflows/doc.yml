@@ -16,7 +16,7 @@ jobs:
         with:
           api-name: Bitcoin Keychain
           api-version: 1.0.0
-          proto-root-dir: ./pb
+          proto-root-dir: pb
           proto-include-dir: _deps/googleapis
-      - name: Print documentation
-        run: cat openapi.yaml
+      - name: Publish documentation
+        run: npx @redocly/openapi-cli@latest push [openapi.yaml] "@ledger/bitcoin-keychain-proto@v1"
