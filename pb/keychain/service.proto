@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 
 service KeychainService {
   // Create a new keychain by extended public key.
+  // The returned UUID depends only of the inputs "extendedPublicKey" and "scheme"
   rpc CreateKeychain(CreateKeychainRequest) returns (KeychainInfo) {
     option (google.api.http) = {
       post: "/v1/bitcoin/CreateKeychain"
